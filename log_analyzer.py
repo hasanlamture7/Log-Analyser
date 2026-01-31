@@ -5,10 +5,45 @@ from collections import Counter
 VALID_LOG_LEVELS = {"INFO", "WARNING", "ERROR", "DEBUG"}
 
 
+def is_valid_log_level(level):
+    """Check if log level is valid."""
+    return level in VALID_LOG_LEVELS
+
+
+def parse_log_line(line, line_number):
+    """
+    Parse a single log line into (timestamp, level, message).
+    Returns None if line is invalid.
+    """
+    line = line.strip()
+
+    if not line:
+        return None
+
+    try:
+        parts = line.split(" ", 3)
+        if len(parts) < 4:
+            raise ValueError("Malformed log entry")
+
+        date_part, time_part, log_level, message = parts
+
+        if not is_valid_log_level(log_level):
+            raise ValueError("Invalid log level")
+
+        timestamp = datetime.strptime(
+            f"{date_part} {time_part}", "%Y-%m-%d %H:%M:%S"
+        )
+
+        return (timestamp, log_level, message)
+
+    except Exception:
+        print(f"Warning: Skipping malformed line {line_number}: {line}")
+        return None
+
+
 def read_and_parse_logs(filename):
     """
-    Reads logs from file and parses them into (timestamp, level, message).
-    Skips malformed lines with a warning.
+    Reads log file and returns a list of parsed log tuples.
     """
     logs = []
 
@@ -22,29 +57,9 @@ def read_and_parse_logs(filename):
 
     with open(filename, "r") as file:
         for line_number, line in enumerate(file, start=1):
-            line = line.strip()
-
-            if not line:
-                continue
-
-            try:
-                parts = line.split(" ", 3)
-                if len(parts) < 4:
-                    raise ValueError("Malformed log entry")
-
-                date_part, time_part, log_level, message = parts
-
-                if log_level not in VALID_LOG_LEVELS:
-                    raise ValueError("Invalid log level")
-
-                timestamp = datetime.strptime(
-                    f"{date_part} {time_part}", "%Y-%m-%d %H:%M:%S"
-                )
-
-                logs.append((timestamp, log_level, message))
-
-            except Exception:
-                print(f"Warning: Skipping malformed line {line_number}: {line}")
+            parsed_log = parse_log_line(line, line_number)
+            if parsed_log:
+                logs.append(parsed_log)
 
     return logs
 
@@ -78,7 +93,7 @@ def save_filtered_logs(filtered_logs, filename):
 
 
 def main():
-    log_file = "log_analyser.txt"
+    log_file = "logs.txt"
     output_file = "filtered_logs.txt"
 
     logs = read_and_parse_logs(log_file)
