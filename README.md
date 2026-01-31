@@ -33,7 +33,9 @@ Enter log level (INFO/WARNING/ERROR/DEBUG): ERROR
 Enter start date (YYYY-MM-DD): 2025-01-10
 Enter end date (YYYY-MM-DD): 2025-01-10
 
+## Sample Input ScreenShots
 
+![Sample Input](images/input.png)
 ---
 
 ## Sample Input (logs.txt)
@@ -66,7 +68,9 @@ Filtered Logs (Saved to filtered_logs.txt):
 2025-01-10 09:35:20 ERROR Timeout occurred
 2025-01-10 09:40:05 WARNING CPU usage high
 
+## Sample Output Screenshot
 
+![Sample Output](images/output.png)
 ---
 
 ##  Error Handling
