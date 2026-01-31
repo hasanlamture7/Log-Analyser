@@ -1,6 +1,5 @@
-import os
-from datetime import datetime
 import pytest
+from datetime import datetime
 
 from log_analyzer import (
     read_and_parse_logs,
@@ -9,7 +8,8 @@ from log_analyzer import (
     filter_logs_by_date
 )
 
-# FIXTURE: sample log file
+
+# FIXTURE: Sample valid log file
 @pytest.fixture
 def sample_log_file(tmp_path):
     file_path = tmp_path / "logs.txt"
@@ -27,7 +27,6 @@ def sample_log_file(tmp_path):
 # TEST: Read and parse logs
 def test_read_and_parse_logs(sample_log_file):
     logs = read_and_parse_logs(sample_log_file)
-
     assert len(logs) == 6
     assert logs[0][1] == "INFO"
     assert logs[2][1] == "ERROR"
@@ -45,7 +44,7 @@ def test_count_log_levels(sample_log_file):
     assert counts["DEBUG"] == 1
 
 
-# TEST: Most recent ERROR log 
+#  TEST: Most recent ERROR log 
 def test_find_most_recent_error(sample_log_file):
     logs = read_and_parse_logs(sample_log_file)
     recent_error = find_most_recent_log(logs, "ERROR")
@@ -64,26 +63,70 @@ def test_filter_logs_by_date(sample_log_file):
 
     filtered = filter_logs_by_date(logs, start_date, end_date)
 
-    assert len(filtered) == 5  # only logs from Jan 10
+    assert len(filtered) == 5
     assert filtered[0][1] == "INFO"
 
 
-# TEST: No logs in date range 
+#  TEST: No logs in date range 
 def test_no_logs_in_date_range(sample_log_file):
     logs = read_and_parse_logs(sample_log_file)
 
-    start_date = datetime.strptime("2025-01-20", "%Y-%m-%d").date()
-    end_date = datetime.strptime("2025-01-21", "%Y-%m-%d").date()
+    start_date = datetime.strptime("2025-02-01", "%Y-%m-%d").date()
+    end_date = datetime.strptime("2025-02-02", "%Y-%m-%d").date()
 
     filtered = filter_logs_by_date(logs, start_date, end_date)
 
     assert filtered == []
 
 
-# TEST: Empty log file
+# TEST: Empty log file 
 def test_empty_log_file(tmp_path):
     empty_file = tmp_path / "empty_logs.txt"
     empty_file.write_text("")
 
     logs = read_and_parse_logs(empty_file)
+
     assert logs == []
+
+
+# TEST: Malformed log line 
+def test_malformed_log_line(tmp_path):
+    file_path = tmp_path / "logs.txt"
+    file_path.write_text(
+        "2025-01-10 09:23:45 INFO Application started\n"
+        "BadLineWithoutProperFormat\n"
+    )
+
+    logs = read_and_parse_logs(file_path)
+
+    # Only valid line should be parsed
+    assert len(logs) == 1
+    assert logs[0][1] == "INFO"
+
+
+#  TEST: Invalid log level 
+def test_invalid_log_level(tmp_path):
+    file_path = tmp_path / "logs.txt"
+    file_path.write_text(
+        "2025-01-10 09:23:45 CRITICAL System failed\n"
+    )
+
+    logs = read_and_parse_logs(file_path)
+
+    # Invalid log level should be skipped
+    assert logs == []
+
+
+# TEST: Single log entry
+def test_single_log_entry(tmp_path):
+    file_path = tmp_path / "logs.txt"
+    file_path.write_text(
+        "2025-01-10 09:23:45 INFO Application started\n"
+    )
+
+    logs = read_and_parse_logs(file_path)
+    counts = count_log_levels(logs)
+
+    assert counts["INFO"] == 1
+    recent = find_most_recent_log(logs, "INFO")
+    assert recent[1] == "INFO"
