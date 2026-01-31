@@ -7,11 +7,11 @@ It reads a log file, counts log levels, finds the most recent log entry for a gi
 ---
 
 ## Project Structure
-log.py
-log_analyser.txt
-filtered_logs.txt
-test_log_analyser.py
-README.md
+- log_analyzer.py
+- logs.txt
+- filtered_logs.txt
+- test_log_analyzer.py
+- README.md
 
 ---
 
@@ -26,8 +26,8 @@ Install pytest:pip install pytest
 
 ## How to Run the Program
 
-1. Place `log_analyser.txt` in the same folder as `log.py`
-2. Run the script:python log.py
+1. Place `logs.txt` in the same folder as `log_analyzer.py`
+2. Run the script:python log_analyzer.py
 3. Enter inputs when prompted:
 Enter log level (INFO/WARNING/ERROR/DEBUG): ERROR
 Enter start date (YYYY-MM-DD): 2025-01-10
@@ -96,8 +96,8 @@ Run tests using pytest: pytest
 
 ##  Submission
 This project contains:
-- log.py
-- log_analyser.txt
+- log_analyzer.py
+- logs.txt
 - filtered_logs.txt
 - README.md
-- test_log_analyser.py
+- test_log_analyzer.py
